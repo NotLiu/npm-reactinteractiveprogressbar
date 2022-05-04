@@ -1,7 +1,7 @@
 {
-  "name": "npm-react-typescript-template",
+  "name": "reactinteractiveprogressbar",
   "version": "1.0.1",
-  "description": "A template for publishing a React + TypeScript package to npm",
+  "description": "NPM package React component for an interactive progress bar",
   "author": "notliu",
   "license": "Apache-2.0",
   "repository": "notliu/npm-reactinteractiveprogressbar",
