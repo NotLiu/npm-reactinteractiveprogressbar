@@ -1,10 +1,26 @@
 import * as React from 'react'
-import './styles.scss'
+import ProgressBar from './package'
 
-const Package: React.FC = () => (
-  <div className="package">
-    <h2>Do cool stuff</h2>
-  </div>
-)
+function Package(
+  accesscolor: string,
+  primarycolor: string,
+  segments: number,
+  fill: number,
+  edit: boolean,
+  progressEmpty: boolean
+) {
+  return (
+    <>
+      <ProgressBar
+        primarycolor={primarycolor}
+        accesscolor={accesscolor}
+        segments={segments}
+        edit={edit}
+        fill={fill}
+        progressEmpty={progressEmpty}
+      />
+    </>
+  )
+}
 
 export default Package
