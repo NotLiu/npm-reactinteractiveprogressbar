@@ -1,6 +1,6 @@
 {
   "name": "react-interactive-progress-bar",
-  "version": "1.0.5",
+  "version": "1.0.0",
   "description": "NPM package React component for an interactive progress bar",
   "author": "notliu",
   "license": "Apache-2.0",
@@ -15,6 +15,7 @@
     "start": "rollup -c -w"
   },
   "dependencies": {
+    "react-icons": "^4.11.0",
     "styled-components": "^5.3.5"
   },
   "peerDependencies": {

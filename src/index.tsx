@@ -1,14 +1,6 @@
-import * as React from 'react'
+import React, { useState } from 'react'
 import styled, { keyframes } from 'styled-components'
-
-export declare interface AppProps {
-  segments: number
-  fill: number
-  progressEmpty: boolean
-  primarycolor: string
-  accesscolor: string
-  edit: boolean
-}
+import { BsCaretLeftFill, BsCaretRightFill } from 'react-icons/bs'
 
 const moveProgress = (progressPercentage: string, oldPercentage: string) => {
   return keyframes`
@@ -22,30 +14,43 @@ const moveProgress = (progressPercentage: string, oldPercentage: string) => {
 }
 
 const RoundedBarCSS = styled.div<{
-  accesscolor: string
+  secondaryColor: string
   primaryColor: string
+  barWidth: string
+  tertiaryColor: string
 }>`
   position: absolute;
   border-width: 5px;
-  border-color: ${({ accesscolor }) => accesscolor || 'black'};
+  border-color: ${({ secondaryColor, tertiaryColor }) =>
+    tertiaryColor !== undefined
+      ? tertiaryColor || 'black'
+      : secondaryColor || 'black'};
   border-radius: 5em;
   border-style: solid;
   height: 1em;
   z-index: 10;
-  width: inherit;
+  width: ${({ barWidth }) => barWidth || '50rem'};
 `
 
 const BarInsideCSS = styled.div<{
-  accesscolor: string
+  secondaryColor: string
   primaryColor: string
   progressEmpty: boolean
+  tertiaryColor: string
 }>`
   position: absolute;
+  top: -2px;
+  left: -2px;
   border-radius: 10em;
-  background-color: ${({ progressEmpty, primaryColor, accesscolor }) =>
-    progressEmpty ? primaryColor || 'white' : accesscolor || 'black'};
+  border-width: 3.5px;
+  background-color: ${({ progressEmpty, primaryColor, secondaryColor }) =>
+    progressEmpty ? primaryColor || 'white' : secondaryColor || 'black'};
   border-style: solid;
-  width: 99.5%;
+  border-color: ${({ secondaryColor, tertiaryColor }) =>
+    tertiaryColor !== undefined
+      ? tertiaryColor || 'black'
+      : secondaryColor || 'black'};
+  width: calc(100% - 2px);
   height: 80%;
   z-index: 1;
 `
@@ -54,18 +59,20 @@ const BarInsideNegCSS = styled.div<{
   progressPercentage: string
   primaryColor: string
   oldPercentage: string
-  accesscolor: string
+  secondaryColor: string
+  tertiaryColor: string
 }>`
   position: absolute;
   background-color: ${({ primaryColor }) => primaryColor || 'white'};
+
   border-top-right-radius: 5em;
   border-bottom-right-radius: 5em;
   border-bottom-left-radius: ${({ progressPercentage }) =>
-    (progressPercentage == '0%' && '5em') || 0};
+    (progressPercentage === '0%' && '5em') || 0};
   border-top-left-radius: ${({ progressPercentage }) =>
-    (progressPercentage == '0%' && '5em') || 0};
-  top: -5%;
-  height: 110%;
+    (progressPercentage === '0%' && '5em') || 0};
+  /* top: -5%; */
+  height: 100%;
   z-index: 2;
   right: 0px;
   width: ${({ progressPercentage }) =>
@@ -78,19 +85,23 @@ const BarInsideNegCSS = styled.div<{
 
 const ProgressNotch = styled.div<{
   progressPercentage: string
-  accesscolor: string
+  secondaryColor: string
   primaryColor: string
+  tertiaryColor: string
 }>`
   position: absolute;
   left: ${({ progressPercentage }) => progressPercentage || '0%'};
-  top: -100%;
-  background-color: ${({ accesscolor }) => accesscolor || 'black'};
+  top: -50%;
+  background-color: ${({ secondaryColor, tertiaryColor }) =>
+    tertiaryColor !== undefined
+      ? tertiaryColor || 'black'
+      : secondaryColor || 'black'};
   /* border-style: solid; */
   border-radius: 2em;
   border-color: ${({ primaryColor }) => primaryColor || 'white'};
   border-width: 3px;
   width: 5px;
-  height: 300%;
+  height: 200%;
   z-index: 5;
 `
 
@@ -109,42 +120,65 @@ const ProgressUlCSS = styled.ul`
   padding: 0 0;
   display: inline-flex;
   flex-direction: row;
-  width: inherit;
+  width: 100%;
 `
 
 const ProgressLiCSS = styled.li`
-  width: inherit;
+  width: 100%;
   padding: 0 0;
   list-style: none;
   /* padding-left: 2em; */
   z-index: 8;
 `
 
-// export const ArrowsCSS = styled.div`
-//   position: absolute;
-//   margin-left: 20.5em;
-//   padding-top: 0.25em;
-//   width: 2em;
-//   color: ${(props) => props.accesscolor || "black"};
-//   z-index: 1;
-// `;
-export default function ProgressBar(props: AppProps) {
-  const [percentage, setPercentage] = React.useState(
-    props.fill * (100 / props.segments) + '%'
+export const ArrowsCSS = styled.div<{
+  secondaryColor: string
+  tertiaryColor: string
+}>`
+  /* position: absolute; */
+  /* margin-left: 20.5em; */
+  padding-top: 0.25em;
+  width: 2em;
+  color: ${({ secondaryColor, tertiaryColor }) =>
+    tertiaryColor !== undefined
+      ? tertiaryColor || 'black'
+      : secondaryColor || 'black'};
+  z-index: 1;
+`
+
+interface props {
+  segments?: number
+  fill?: number
+  primaryColor?: string
+  secondaryColor?: string
+  tertiaryColor?: string
+  edit?: boolean
+  width?: string
+}
+
+export default function ProgressBar({
+  segments = 4,
+  fill = 1,
+  primaryColor = 'white',
+  secondaryColor = 'black',
+  tertiaryColor = 'black',
+  edit = true,
+  width = '20rem',
+}: props) {
+  const [percentage, setPercentage] = useState(fill * (100 / segments) + '%')
+  const [lastPercentage, setLastPercentage] = useState(
+    fill * (100 / segments) + '%'
   )
-  const [lastPercentage, setLastPercentage] = React.useState(
-    props.fill * (100 / props.segments) + '%'
-  )
-  const [progressEmpty, setProgressempty] = React.useState(props.progressEmpty)
-  const [lastSegment, setlastSegment] = React.useState(props.fill)
-  const [secondlastSegment, setSecondlastSegment] = React.useState(props.fill)
-  const numSegments = props.segments
+  const [progressEmpty, setProgressempty] = useState(false)
+  const [lastSegment, setlastSegment] = useState(fill)
+  const [secondlastSegment, setSecondlastSegment] = useState(fill)
+  const numSegments = segments
 
   function handleProgress(segment: number) {
     setlastSegment(segment)
     setSecondlastSegment(lastSegment)
     setLastPercentage(percentage)
-    if (segment == lastSegment && segment == 1 && progressEmpty == false) {
+    if (segment === lastSegment && segment === 1 && progressEmpty === false) {
       // setProgressempty(true);
     } else {
       setProgressempty(false)
@@ -152,10 +186,10 @@ export default function ProgressBar(props: AppProps) {
 
     //logic for making sure clicking progress bar functions properly, e.g. clicking lit section unlights it, after unlighting a section you can unlight the next lit section in one click, you can light and unlight sections repeatedly
     if (
-      (segment == lastSegment &&
-        progressEmpty == false &&
-        lastSegment != secondlastSegment) ||
-      segment * (100 / numSegments) + '%' == percentage
+      (segment === lastSegment &&
+        progressEmpty === false &&
+        lastSegment !== secondlastSegment) ||
+      segment * (100 / numSegments) + '%' === percentage
     ) {
       setPercentage((segment - 1) * (100 / numSegments) + '%')
     } else {
@@ -163,26 +197,26 @@ export default function ProgressBar(props: AppProps) {
     }
   }
 
-  // function handleArrows(change) {
-  //   setlastSegment(
-  //     (parseFloat(percentage.slice(0, -1)) + change) / (100 / numSegments)
-  //   );
-  //   setSecondlastSegment(lastSegment);
-  //   setLastPercentage(percentage);
-  //   if (
-  //     !(parseFloat(percentage.slice(0, -1)) + change > 100) &&
-  //     !(parseFloat(percentage.slice(0, -1)) + change < 0)
-  //   ) {
-  //     if (parseFloat(percentage.slice(0, -1)) + change + "%" == "0%") {
-  //       // setProgressempty(true);
-  //     } else {
-  //       setProgressempty(false);
-  //     }
-  //     setPercentage(parseFloat(percentage.slice(0, -1)) + change + "%");
-  //   } else {
-  //     console.log("ARROW CHANGE OUT OF BOUNDS");
-  //   }
-  // }
+  function handleArrows(change) {
+    setlastSegment(
+      (parseFloat(percentage.slice(0, -1)) + change) / (100 / numSegments)
+    )
+    setSecondlastSegment(lastSegment)
+    setLastPercentage(percentage)
+    if (
+      !(parseFloat(percentage.slice(0, -1)) + change > 100) &&
+      !(parseFloat(percentage.slice(0, -1)) + change < 0)
+    ) {
+      if (parseFloat(percentage.slice(0, -1)) + change + '%' === '0%') {
+        // setProgressempty(true);
+      } else {
+        setProgressempty(false)
+      }
+      setPercentage(parseFloat(percentage.slice(0, -1)) + change + '%')
+    } else {
+      console.log('ARROW CHANGE OUT OF BOUNDS')
+    }
+  }
 
   function generateNotches() {
     const notches: JSX.Element[] = []
@@ -190,8 +224,9 @@ export default function ProgressBar(props: AppProps) {
       notches.push(
         <ProgressNotch
           progressPercentage={(100 / numSegments) * i + '%'}
-          primaryColor={props.primarycolor}
-          accesscolor={props.accesscolor}
+          primaryColor={primaryColor}
+          secondaryColor={secondaryColor}
+          tertiaryColor={tertiaryColor}
           key={i}
         />
       )
@@ -220,45 +255,51 @@ export default function ProgressBar(props: AppProps) {
     <ProgressUlCSS>
       <ProgressLiCSS>
         <RoundedBarCSS
-          primaryColor={props.primarycolor}
-          accesscolor={props.accesscolor}
+          primaryColor={primaryColor}
+          secondaryColor={secondaryColor}
+          tertiaryColor={tertiaryColor}
+          barWidth={width}
         >
           {generateNotches()}
-          {props.edit && generateButtons()}
+          {edit && generateButtons()}
 
           <BarInsideCSS
             progressEmpty={progressEmpty}
-            primaryColor={props.primarycolor}
-            accesscolor={props.accesscolor}
+            primaryColor={primaryColor}
+            secondaryColor={secondaryColor}
+            tertiaryColor={tertiaryColor}
           >
             <BarInsideNegCSS
               progressPercentage={percentage}
               oldPercentage={lastPercentage}
-              primaryColor={props.primarycolor}
-              accesscolor={props.accesscolor}
+              primaryColor={primaryColor}
+              secondaryColor={secondaryColor}
+              tertiaryColor={tertiaryColor}
             ></BarInsideNegCSS>
           </BarInsideCSS>
         </RoundedBarCSS>
       </ProgressLiCSS>
-      {/* <ProgressLiCSS>
-          {props.edit && (
-            <ArrowsCSS
-              primaryColor={props.primaryColor}
-              accesscolor={props.accesscolor}
-            >
-              <BsFillCaretLeftFill
-                onClick={() => {
-                  handleArrows(-(100 / numSegments));
-                }}
-              />
-              <BsFillCaretRightFill
-                onClick={() => {
-                  handleArrows(100 / numSegments);
-                }}
-              />
-            </ArrowsCSS>
-          )}
-        </ProgressLiCSS> */}
+      <ProgressLiCSS
+        style={{ position: 'absolute', left: `calc(${width} + 2rem)` }}
+      >
+        {edit && (
+          <ArrowsCSS
+            secondaryColor={secondaryColor}
+            tertiaryColor={tertiaryColor}
+          >
+            <BsCaretLeftFill
+              onClick={() => {
+                handleArrows(-(100 / numSegments))
+              }}
+            />
+            <BsCaretRightFill
+              onClick={() => {
+                handleArrows(100 / numSegments)
+              }}
+            />
+          </ArrowsCSS>
+        )}
+      </ProgressLiCSS>
     </ProgressUlCSS>
   )
 }
